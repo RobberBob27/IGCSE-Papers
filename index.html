@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="color-scheme" content="dark">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>IGCSE Papers</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+  --h:150;--s:40%;--a:65%;--l:58%;--is:40%;
+  --bgl:8%;--sl:12%;--ll:21%;--ad:0%;
+  --bg:hsl(var(--h) var(--s) var(--bgl));--surface:hsl(var(--h) var(--s) var(--sl));--line:hsl(var(--h) var(--s) var(--ll));
+  --ink:hsl(var(--h) var(--is) 94%);--muted:hsl(var(--h) calc(var(--is) * .6) 68%);
+  --accent:hsl(var(--h) var(--a) calc(var(--l) - var(--ad)));--accent-ink:hsl(var(--h) var(--s) 7%);--mark:#FFD84D;--mark-ink:#1B1B14;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px);scroll-behavior:smooth}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Figtree,system-ui,sans-serif;font-size:16px;line-height:1.55}
+h1,h2,h3{font-family:'Bricolage Grotesque',system-ui,sans-serif;line-height:1.1;margin:0}
+a{color:inherit}
+button{font:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+.bar{display:flex;align-items:center;gap:20px;height:60px}
+.logo{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:20px;text-decoration:none}
+.logo span{background:var(--mark);color:var(--mark-ink);padding:0 6px;border-radius:4px;margin-right:4px}
+nav{display:flex;gap:4px;margin-left:auto;overflow-x:auto}
+nav a{padding:8px 12px;border-radius:8px;text-decoration:none;color:var(--muted);font-weight:500;white-space:nowrap}
+nav a:hover{background:var(--surface);color:var(--ink)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 16px;border-radius:10px;border:1.5px solid var(--ink);background:transparent;color:var(--ink);font-weight:600;text-decoration:none}
+.btn:hover{background:var(--ink);color:var(--bg)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.1);background:var(--accent);color:var(--accent-ink)}
+.btn.sm{padding:6px 12px;font-size:14px;border-radius:8px;border-width:1.5px}
+.hero{padding:56px 0 40px}
+.hero h1{font-size:clamp(36px,6vw,64px);font-weight:800;max-width:14ch}
+.hero p{max-width:52ch;color:var(--muted);font-size:18px;margin:16px 0 28px}
+.search{display:flex;gap:8px;max-width:560px}
+.search input{flex:1;min-width:0;padding:12px 14px;border-radius:10px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);font:inherit}
+.levels{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}
+.chip{padding:6px 14px;border-radius:999px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);font-weight:500}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+section{padding:40px 0}
+.head{display:flex;align-items:end;justify-content:space-between;gap:16px;margin-bottom:20px}
+.head h2{font-size:28px;font-weight:700}
+.subjects{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.subj{display:flex;flex-direction:column;gap:6px;text-align:left;padding:16px;border-radius:12px;background:var(--surface);border:1.5px solid var(--line);color:var(--ink)}
+.subj:hover{border-color:var(--accent)}
+.subj[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1.5px var(--accent)}
+.subj b{font-family:'Bricolage Grotesque',sans-serif;font-size:18px}
+.subj small{color:var(--muted)}
+.browser{background:var(--surface);border:1.5px solid var(--line);border-radius:14px;overflow:hidden}
+.filters{display:flex;flex-wrap:wrap;gap:10px;padding:14px;border-bottom:1px solid var(--line)}
+.filters select{padding:8px 10px;border-radius:8px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);font:inherit}
+.scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:640px}
+th,td{text-align:left;padding:12px 14px;border-bottom:1px solid var(--line)}
+th{font-size:14px;color:var(--muted);font-weight:600}
+tr:last-child td{border-bottom:0}
+tr.yr td{background:var(--bg);color:var(--accent);font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:15px;padding:7px 14px;border-top:1px solid var(--line)}
+td.acts{display:flex;gap:8px;flex-wrap:wrap}
+.pblock+.pblock{margin-top:40px}
+.chip.sm{padding:4px 14px;font-size:14px}
+.units{display:flex;gap:8px;margin-bottom:14px}
+.lead{color:var(--muted);margin:0 0 16px}
+.tracks{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;max-width:560px}
+.track{display:flex;flex-direction:column;align-items:flex-start;gap:4px;padding:22px;border-radius:14px;border:1.5px solid var(--accent);background:var(--surface);color:var(--ink);text-align:left}
+.track b{font-family:'Bricolage Grotesque',sans-serif;font-size:24px}
+.track small{display:flex;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.track:hover{background:var(--accent);color:var(--accent-ink)}
+.track:hover small{color:var(--accent-ink)}
+.tabs{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.notes{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.note{padding:18px;border-radius:12px;background:var(--surface);border:1.5px solid var(--line);display:flex;flex-direction:column;gap:12px}
+.note h3{font-size:18px}
+.ph{height:10px;border-radius:5px;background:var(--line)}
+.ph.s{width:60%}
+.empty{padding:28px;text-align:center;color:var(--muted);border:1.5px dashed var(--line);border-radius:12px}
+footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);font-size:14px}
+.foot{display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between}
+.foot nav{margin:0}
+#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;opacity:0;pointer-events:none;transition:.2s;font-weight:500;z-index:10}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+body,.subj,.track,.browser,.note,.btn,.chip,input,select,header.top{transition:background-color .3s,border-color .3s,color .3s}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap bar">
+  <a class="logo" href="#top"><span>IGCSE</span>Papers</a>
+  <nav aria-label="Main">
+    <a href="#subjects">Subjects</a>
+    <a href="#papers">Past papers</a>
+    <a href="#notes">Study content</a>
+    <a href="#revision" id="navRevision">Ask AI</a>
+  </nav>
+  <button class="btn sm" data-ph>Log in</button>
+</div></header>
+
+<main id="top">
+<div class="wrap hero">
+  <h1>Every IGCSE past paper in one place.</h1>
+  <p>Pick a subject, choose a year and session, then open the question paper, mark scheme or examiner report.</p>
+  <form class="search" onsubmit="return false" role="search">
+    <input type="search" placeholder="Search a subject or paper code" aria-label="Search papers">
+    <button class="btn primary" data-ph>Search</button>
+  </form>
+  <div class="levels" role="group" aria-label="Exam board">
+    <button class="chip" aria-pressed="true">Edexcel</button>
+  </div>
+</div>
+
+<section id="subjects"><div class="wrap">
+  <div class="head"><h2>Subjects</h2><button class="btn sm" data-ph>View all subjects</button></div>
+  <div class="subjects" id="subjGrid"></div>
+</div></section>
+
+<section id="papers"><div class="wrap" id="paperSections"></div></section>
+
+<section id="notes"><div class="wrap">
+  <div class="head"><h2>Study content</h2></div>
+  <div class="tabs" role="group" aria-label="Content type">
+    <button class="chip" aria-pressed="true">Revision notes</button>
+    <button class="chip" aria-pressed="false">Topic summaries</button>
+    <button class="chip" aria-pressed="false">Formula sheets</button>
+    <button class="chip" aria-pressed="false">Syllabus</button>
+  </div>
+  <div class="notes" id="noteGrid"></div>
+  <div class="empty" style="margin-top:16px">More content will appear here. <button class="btn sm" data-ph style="margin-left:8px">Request a topic</button></div>
+</div></section>
+</main>
+
+<main id="papersPage" hidden><div class="wrap" style="padding-top:28px;padding-bottom:40px">
+  <button class="btn sm" id="backBtn">Back to subjects</button>
+  <div id="pageContent" style="margin-top:20px"></div>
+</div></main>
+
+<!-- Separate AI Revision Page View -->
+<main id="revisionPage" hidden><div class="wrap" style="padding-top:40px;padding-bottom:60px">
+  <button class="btn sm" id="revBackBtn">Back to home</button>
+  <div style="max-width:720px; margin:40px auto 0 auto; text-align:center;">
+    <h1 style="font-size:clamp(36px,5vw,56px); font-weight:800; margin-bottom:14px;">What would you like to revise today?</h1>
+    <p class="lead" style="margin-bottom:32px;">Ask any question or enter any IGCSE topic to get instant revision breakdowns, core concepts, and key definitions.</p>
+    <form id="revForm" class="search" style="max-width:100%; margin-bottom:32px;">
+      <input type="text" id="revInput" placeholder="e.g., Quadratic equations, Photosynthesis, Kinematics..." aria-label="Revision topic" style="flex:1; padding:14px 18px; font-size:16px;">
+      <button class="btn primary" type="submit" style="padding:14px 24px;">Ask AI</button>
+    </form>
+  </div>
+  <div id="revOutput" style="max-width:720px; margin:0 auto; display:flex; flex-direction:column; gap:16px;"></div>
+</div></main>
+
+<footer><div class="wrap foot">
+  <div>IGCSE Papers. Not affiliated with any exam board.</div>
+  <nav aria-label="Footer"><a href="#subjects">Subjects</a><a href="#papers">Past papers</a><a href="#notes">Study content</a><a href="#" data-ph>Contact</a></nav>
+</div></footer>
+
+<div id="toast" role="status" aria-live="polite">Placeholder: add your file or link here.</div>
+
+<script>
+var subjects=[
+["Mathematics","4MA1",215,"45%","85%","64%"],
+["Physics","4PH1",270,"40%","80%","70%"],
+["Chemistry","4CH1",27,"50%","90%","60%"],
+["Biology","4BI1",150,"40%","65%","58%"],
+["English Language","4EA1",48,"45%","95%","56%"],
+["English Literature","4ET1",175,"40%","70%","55%"],
+["Computer Science","4CP0",0,"0%","0%","72%"],
+["Economics","4EC1",335,"42%","80%","66%"],
+["Business","4BS1",85,"40%","65%","55%"],
+["Geography","4GE1",32,"28%","45%","58%"],
+["History","4HI1",352,"45%","75%","62%"]];
+var current=null,root=document.documentElement.style;
+var grid=document.getElementById("subjGrid"),sections=document.getElementById("paperSections");
+function applyTheme(s){
+  var v=s?{h:s[2],s:s[3],a:s[4],l:s[5],is:s[3]==="0%"?"0%":"40%"}:{h:150,s:"40%",a:"65%",l:"58%",is:"40%"};
+  root.setProperty("--h",v.h);root.setProperty("--s",v.s);root.setProperty("--a",v.a);root.setProperty("--l",v.l);root.setProperty("--is",v.is);
+}
+function drawSubjects(){
+  grid.innerHTML="";
+  subjects.forEach(function(s){
+    var b=document.createElement("button");
+    b.className="subj";b.setAttribute("aria-pressed",s===current);
+    b.innerHTML="<b>"+nm(s[0])+"</b><small>("+s[1]+")</small>";
+    b.onclick=function(){current=s;applyTheme(s);drawSubjects();drawRows();document.getElementById("papers").scrollIntoView()};
+    grid.appendChild(b);
+  });
+}
+var split=["Mathematics","Physics","Chemistry","Biology"];
+function nm(n){return n==="Mathematics"?"Mathematics A":n}
+
+var pdfs={
+/*Mathematics A Modular Specimen Papers*/
+"Mathematics|Modular|U1|Foundation|specimen|qp":"maths-modular-u1-foundation-specimen-qp.pdf",
+"Mathematics|Modular|U1|Higher|specimen|qp":"maths-modular-u1-higher-specimen-qp.pdf",
+
+/*Physics Modular Specimen Papers*/
+"Physics|Modular|U1|specimen|qp":"physics-modular-u1-specimen-qp.pdf#page=9",
+"Physics|Modular|U2|specimen|qp":"physics-modular-u2-specimen-qp.pdf",
+
+/*Chemistry Modular Specimen Papers*/
+"Chemistry|Modular|U1|specimen|qp":"chemistry-modular-u1-specimen-qp.pdf",
+"Chemistry|Modular|U2|specimen|qp":"chemistry-modular-u2-specimen-qp.pdf",
+
+/*Chemistry Modular 2025 Papers (Standard & Regional)*/
+"Chemistry|Modular|U1|2025|May/June|qp":"chemistry-modular-u1-2025-qp.pdf",
+"Chemistry|Modular|U1|2025|Regional|May/June|qp":"chemistry-modular-u1regional-2025-qp.pdf",
+"Chemistry|Modular|U2|2025|May/June|qp":"chemistry-modular-u2-2025-qp.pdf",
+"Chemistry|Modular|U2|2025|Regional|May/June|qp":"chemistry-modular-u2regional-2025-qp.pdf",
+/*Chemistry Modular 2025 Mark Schemes (Standard & Regional)*/
+"Chemistry|Modular|U1|2025|May/June|ms":"chemistry-modular-u1-2025-ms.pdf#page=4",
+"Chemistry|Modular|U1|2025|Regional|May/June|ms":"chemistry-modular-u1regional-2025-ms.pdf#page=4",
+"Chemistry|Modular|U2|2025|May/June|ms":"chemistry-modular-u2-2025-ms.pdf#page=4",
+"Chemistry|Modular|U2|2025|Regional|May/June|ms":"chemistry-modular-u2regional-2025-ms.pdf#page=4",
+
+/*Biology Modular Specimen Papers*/
+"Biology|Modular|U1|specimen|qp":"biology-modular-u1-specimen-qp.pdf",
+"Biology|Modular|U2|specimen|qp":"biology-modular-u2-specimen-qp.pdf",
+};
+
+function fb(label,key){return pdfs[key]?"<a class='btn sm' href='"+pdfs[key]+"' target='_blank' rel='noopener'>"+label+"</a>":"<button class='btn sm' data-ph>"+label+"</button>"}
+
+var filters="<div class='filters'><select aria-label='Year'><option>All years</option><option>2025</option><option>2024</option><option>2023</option><option>2022</option><option>2021</option><option>2020</option></select><select aria-label='Session'><option>All sessions</option><option>Feb/March</option><option>May/June</option><option>Oct/Nov</option></select><select aria-label='Paper'><option>All papers</option><option>Paper 1</option><option>Paper 2</option><option>Paper 3</option><option>Paper 4</option></select><button class='btn sm' data-filter-reset>Reset filters</button></div>";
+
+function rowsFor(code,prefix,mod,plain,ctx,onlySpec,onlyYear){
+  var isChemOrBio = current && (current[0] === "Chemistry" || current[0] === "Biology");
+  var sessions = mod ? (isChemOrBio ? ["May/June"] : ["May/June", "Oct/Nov"]) : ["May/June", "Oct/Nov", "Feb/March"];
+  var html="",papers=mod?["Paper 1","Paper 1"]:["Paper 1","Paper 2","Paper 3"];
+  for(var y=onlyYear||2025;y>=(onlyYear||2023);y--){
+    html+="<tr class='yr' data-year='"+y+"'><td colspan='3'>"+y+"</td></tr>";
+    for(var i=0;i<sessions.length;i++){
+      var sess=sessions[i];
+      var pName=mod?"Paper 1":papers[i];
+      
+      var k=ctx+"|"+y+"|"+sess+(mod?"":"|"+pName);
+      html+="<tr><td>"+sess+"</td><td>"+(prefix||"")+(plain?"":pName+" ")+"("+code+")</td><td class='acts'>"+
+      fb("Question paper",k+"|qp")+fb("Mark scheme",k+"|ms")+fb("Examiner report",k+"|er")+"</td></tr>";
+      
+      var rKey=ctx+"|"+y+"|Regional|"+sess+(mod?"":"|"+pName);
+      var rPName=mod?"Paper 1R":pName+"R";
+      html+="<tr><td>"+sess+"</td><td>"+(prefix||"")+(plain?"":rPName+" ")+"(Timezone R) ("+code+")</td><td class='acts'>"+
+      fb("Question paper",rKey+"|qp")+fb("Mark scheme",rKey+"|ms")+fb("Examiner report",rKey+"|er")+"</td></tr>";
+    }
+  }
+  var sp="<tr class='yr' data-year='Specimen'><td colspan='3'>Specimen Papers</td></tr>";
+  (mod?["Paper 1"]:["Paper 1","Paper 2","Paper 3"]).forEach(function(n){
+    var k2=ctx+"|specimen"+(mod?"":"|"+n);
+    sp+="<tr><td>Specimen</td><td>"+(prefix||"")+(plain?"":n+" ")+"("+code+")</td><td class='acts'>"+fb("Question paper",k2+"|qp")+fb("Mark scheme",k2+"|ms")+"</td></tr>";
+  });
+  return onlySpec?sp:sp+html;
+}
+
+function block(t,body,extra){
+  return "<div class='pblock'><div class='head'><h2>"+t+"</h2><button class='btn sm' data-ph>Download all as ZIP</button></div>"+(extra||"")+"<div class='browser'>"+filters+"<div class='scroll'><table><thead><tr><th>Session</th><th>Paper</th><th>Files</th></tr></thead><tbody>"+body+"</tbody></table></div></div></div>";
+}
+
+var tracks={
+"Mathematics":{Modular:"4XMAF, 4XMAH",Linear:"4MA1"},
+"Physics":{Modular:"4XPH1",Linear:"4PH1"},
+"Chemistry":{Modular:"4XCH1",Linear:"4CH1"},
+"Biology":{Modular:"4XBI1",Linear:"4BI1"}};
+
+function chooser(t){
+  var tr=tracks[current[0]];
+  return "<div class='head'><h2>"+t+"</h2></div><p class='lead'>Choose your specification.</p><div class='tracks'>"+
+  ["Modular","Linear"].map(function(k){return "<button class='track' data-track='"+k+"'><b>"+k+"</b><small>"+tr[k].split(", ").map(function(c){return "<span>("+c+")</span>"}).join("")+"</small></button>"}).join("")+"</div>";
+}
+
+function drawRows(){
+  if(!current){sections.innerHTML=block("Papers","<tr><td colspan='3' style='color:var(--muted)'>Select a subject above to see its papers.</td></tr>");return}
+  var t=nm(current[0])+" Papers";
+  sections.innerHTML=tracks[current[0]]?chooser(t):block(t,rowsFor(current[1],"",false,false,current[0]));
+}
+
+var home=document.getElementById("top"),page=document.getElementById("papersPage"),revPage=document.getElementById("revisionPage"),content=document.getElementById("pageContent");
+function setDim(on){root.setProperty("--bgl",on?"5%":"8%");root.setProperty("--sl",on?"8%":"12%");root.setProperty("--ll",on?"15%":"21%")}
+function showHome(){setDim(false);page.hidden=true;revPage.hidden=true;home.hidden=false}
+var track=null,unit=1;
+
+function renderPage(){
+  var code=tracks[current[0]][track],mod=track==="Modular",lab=" Papers"+(mod?" (Modular)":"");
+  var pfx=mod?"Unit "+unit+" \u00b7 ":"",u="";
+  if(mod){
+    setDim(unit===2);
+    u="<div class='units' role='group' aria-label='Unit'>"+[1,2].map(function(n){return "<button class='chip sm' data-unit='"+n+"' aria-pressed='"+(n===unit)+"'>Unit "+n+"</button>"}).join("")+"</div>";
+  }else{setDim(false)}
+  
+  var mm=current[0]==="Mathematics",md=mm&&mod,hc=md?"4WM"+unit+"H/01":code,fc=md?"4WM"+unit+"F/01":code;
+  var isChemOrBio = current && (current[0] === "Chemistry" || current[0] === "Biology");
+  var base=current[0]+"|"+track+(mod?"|U"+unit:"");
+  
+  if(md){
+    var html=block(nm(current[0])+" Higher Tier"+lab,rowsFor(hc,"Unit "+unit+" \u00b7 Higher \u00b7 ",mod,false,base+"|Higher",true),u);
+    html+=block(nm(current[0])+" Foundation Tier"+lab,rowsFor(fc,"Unit "+unit+" \u00b7 Foundation \u00b7 ",mod,false,base+"|Foundation",true),"");
+    content.innerHTML=html;
+  } else {
+    content.innerHTML=block(nm(current[0])+lab, rowsFor(code, pfx, mod, false, base, mod && !isChemOrBio, isChemOrBio ? 2025 : 0), u);
+  }
+}
+
+function openPage(k){
+  track=k;unit=1;renderPage();
+  home.hidden=true;revPage.hidden=true;page.hidden=false;window.scrollTo(0,0);
+}
+
+content.addEventListener("click",function(e){
+  var b=e.target.closest("[data-unit]");
+  if(b){unit=+b.getAttribute("data-unit");renderPage()}
+});
+
+sections.addEventListener("click",function(e){
+  var t=e.target.closest("[data-track]");
+  if(t)openPage(t.getAttribute("data-track"));
+});
+
+document.getElementById("backBtn").addEventListener("click",showHome);
+document.getElementById("revBackBtn").addEventListener("click",showHome);
+
+document.getElementById("navRevision").addEventListener("click",function(e){
+  e.preventDefault();
+  home.hidden=true;
+  page.hidden=true;
+  revPage.hidden=false;
+  window.scrollTo(0,0);
+});
+
+document.querySelectorAll("header.top a:not(#navRevision), footer a[href^='#']").forEach(function(a){
+  a.addEventListener("click",showHome)
+});
+
+var notes=document.getElementById("noteGrid"),nh="";
+["Topic 1","Topic 2","Topic 3","Topic 4"].forEach(function(t){
+  nh+="<div class='note'><h3>"+t+" title</h3><div class='ph'></div><div class='ph s'></div><button class='btn sm' data-ph style='align-self:start'>Open notes</button></div>";
+});
+notes.innerHTML=nh;
+
+document.querySelectorAll(".chip").forEach(function(c){
+  c.addEventListener("click",function(){
+    c.parentNode.querySelectorAll(".chip").forEach(function(o){o.setAttribute("aria-pressed",o===c)});
+  });
+});
+
+// --- FILTER FUNCTIONALITY LOGIC ---
+document.addEventListener("change", function(e){
+  var sel = e.target.closest(".filters select");
+  if(!sel) return;
+  var browser = sel.closest(".browser");
+  if(browser) applyTableFilters(browser);
+});
+
+document.addEventListener("click", function(e){
+  var btn = e.target.closest("[data-filter-reset]");
+  if(!btn) return;
+  var browser = btn.closest(".browser");
+  if(browser){
+    browser.querySelectorAll(".filters select").forEach(function(s){ s.selectedIndex = 0; });
+    applyTableFilters(browser);
+  }
+});
+
+function applyTableFilters(browser){
+  var selects = browser.querySelectorAll(".filters select");
+  var fYear = selects[0].value;
+  var fSession = selects[1].value;
+  var fPaper = selects[2].value;
+
+  var tbody = browser.querySelector("tbody");
+  if(!tbody) return;
+  var rows = tbody.querySelectorAll("tr");
+
+  var currentYear = "";
+  var currentYearRow = null;
+  var visibleRowsInCurrentYear = 0;
+
+  rows.forEach(function(row){
+    if(row.classList.contains("yr")){
+      if(currentYearRow){
+        currentYearRow.style.display = visibleRowsInCurrentYear > 0 ? "" : "none";
+      }
+      currentYearRow = row;
+      currentYear = row.getAttribute("data-year") || row.textContent.trim();
+      visibleRowsInCurrentYear = 0;
+      return;
+    }
+
+    var sessionCell = row.cells[0];
+    var paperCell = row.cells[1];
+    if(!sessionCell || !paperCell) return;
+
+    var sessionText = sessionCell.textContent.trim();
+    var paperText = paperCell.textContent.trim();
+
+    var matchYear = false;
+    if(fYear === "All years"){
+      matchYear = true;
+    } else if(currentYear.includes("Specimen")){
+      matchYear = (fYear === "Specimen");
+    } else {
+      matchYear = (currentYear === fYear);
+    }
+
+    var matchSession = false;
+    if(fSession === "All sessions"){
+      matchSession = true;
+    } else if(sessionText.toLowerCase().includes(fSession.toLowerCase())){
+      matchSession = true;
+    }
+
+    var matchPaper = false;
+    if(fPaper === "All papers"){
+      matchPaper = true;
+    } else {
+      matchPaper = paperText.includes(fPaper);
+    }
+
+    if(matchYear && matchSession && matchPaper){
+      row.style.display = "";
+      visibleRowsInCurrentYear++;
+    } else {
+      row.style.display = "none";
+    }
+  });
+
+  if(currentYearRow){
+    currentYearRow.style.display = visibleRowsInCurrentYear > 0 ? "" : "none";
+  }
+}
+
+// --- AI REVISION PAGE LOGIC ---
+var revForm = document.getElementById("revForm");
+var revInput = document.getElementById("revInput");
+var revOutput = document.getElementById("revOutput");
+
+revForm.onsubmit = function(e){
+  e.preventDefault();
+  var topic = revInput.value.trim();
+  if(!topic) return;
+
+  var qCard = document.createElement("div");
+  qCard.className = "browser";
+  qCard.style.padding = "16px 20px";
+  qCard.style.textAlign = "left";
+  qCard.innerHTML = "<small style='color:var(--muted); display:block; margin-bottom:4px;'>Topic Searched</small><b>" + topic + "</b>";
+  revOutput.prepend(qCard);
+
+  var aCard = document.createElement("div");
+  aCard.className = "browser";
+  aCard.style.padding = "20px";
+  aCard.style.textAlign = "left";
+  aCard.innerHTML = "<small style='color:var(--accent); font-weight:700; display:block; margin-bottom:4px;'>AI Revision Summary</small><h3 style='font-size:20px; margin-bottom:10px;'>" + topic + "</h3><p style='color:var(--muted); margin:0;'>Here is a breakdown of key definitions, formulas, and common exam pitfalls for <b>" + topic + "</b>. (Connect this form handler to a backend serverless function using the Gemini API to stream live custom explanations!)</p>";
+  revOutput.prepend(aCard);
+
+  revInput.value = "";
+};
+
+var toast=document.getElementById("toast"),tt;
+document.addEventListener("click",function(e){
+  var b=e.target.closest("[data-ph]");
+  if(!b)return;
+  e.preventDefault();
+  toast.classList.add("on");clearTimeout(tt);tt=setTimeout(function(){toast.classList.remove("on")},1800);
+});
+
+drawSubjects();drawRows();
+</script>
+</body>
+</html>
