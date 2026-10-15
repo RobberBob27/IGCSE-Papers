@@ -430,32 +430,55 @@ function applyTableFilters(browser){
   }
 }
 
-// --- AI REVISION PAGE LOGIC ---
+// --- AI REVISION PAGE LOGIC (CONNECTED TO CLOUDFLARE BACKEND) ---
 var revForm = document.getElementById("revForm");
 var revInput = document.getElementById("revInput");
 var revOutput = document.getElementById("revOutput");
 
-revForm.onsubmit = function(e){
-  e.preventDefault();
-  var topic = revInput.value.trim();
-  if(!topic) return;
+if (revForm) {
+  revForm.onsubmit = async function(e) {
+    e.preventDefault();
+    var topic = revInput.value.trim();
+    if (!topic) return;
 
-  var qCard = document.createElement("div");
-  qCard.className = "browser";
-  qCard.style.padding = "16px 20px";
-  qCard.style.textAlign = "left";
-  qCard.innerHTML = "<small style='color:var(--muted); display:block; margin-bottom:4px;'>Topic Searched</small><b>" + topic + "</b>";
-  revOutput.prepend(qCard);
+    // Display a temporary loading card
+    var loadingCard = document.createElement("div");
+    loadingCard.className = "browser";
+    loadingCard.style.padding = "20px";
+    loadingCard.style.textAlign = "left";
+    loadingCard.innerHTML = "<small style='color:var(--muted); display:block; margin-bottom:4px;'>Topic Searched</small><b>" + topic + "</b><p style='color:var(--muted); margin-top:12px;'>AI is generating your revision summary...</p>";
+    revOutput.prepend(loadingCard);
 
-  var aCard = document.createElement("div");
-  aCard.className = "browser";
-  aCard.style.padding = "20px";
-  aCard.style.textAlign = "left";
-  aCard.innerHTML = "<small style='color:var(--accent); font-weight:700; display:block; margin-bottom:4px;'>AI Revision Summary</small><h3 style='font-size:20px; margin-bottom:10px;'>" + topic + "</h3><p style='color:var(--muted); margin:0;'>Here is a breakdown of key definitions, formulas, and common exam pitfalls for <b>" + topic + "</b>. (Connect this form handler to a backend serverless function using the Gemini API to stream live custom explanations!)</p>";
-  revOutput.prepend(aCard);
+    try {
+      var res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          prompt: topic,
+          subject: current ? current[0] : "General IGCSE"
+        })
+      });
 
-  revInput.value = "";
-};
+      var data = await res.json();
+      
+      if (!res.ok || data.error) {
+        loadingCard.innerHTML = "<small style='color:var(--muted); display:block; margin-bottom:4px;'>Topic Searched</small><b>" + topic + "</b><p style='color:red; margin-top:12px;'>Error: " + (data.error || "Failed to generate response.") + "</p>";
+        return;
+      }
+
+      // Replace loading text with the live AI response from Cloudflare
+      loadingCard.innerHTML = 
+        "<small style='color:var(--muted); display:block; margin-bottom:4px;'>Topic Searched</small><b>" + topic + "</b>" +
+        "<div style='margin-top:16px;'><small style='color:var(--accent); font-weight:700; display:block; margin-bottom:4px;'>AI Revision Summary</small>" +
+        "<p style='color:var(--ink); line-height:1.6; white-space:pre-wrap; margin:0;'>" + data.reply + "</p></div>";
+
+    } catch (err) {
+      loadingCard.innerHTML = "<small style='color:var(--muted); display:block; margin-bottom:4px;'>Topic Searched</small><b>" + topic + "</b><p style='color:red; margin-top:12px;'>Connection error. Please try again.</p>";
+    }
+
+    revInput.value = "";
+  };
+}
 
 var toast=document.getElementById("toast"),tt;
 document.addEventListener("click",function(e){
