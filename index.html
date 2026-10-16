@@ -430,7 +430,7 @@ function applyTableFilters(browser){
   }
 }
 
-// --- AI REVISION PAGE LOGIC (CONNECTED TO CLOUDFLARE BACKEND) ---
+// --- AI REVISION PAGE LOGIC (CONNECTED TO NETLIFY /api/chat) ---
 var revForm = document.getElementById("revForm");
 var revInput = document.getElementById("revInput");
 var revOutput = document.getElementById("revOutput");
@@ -466,7 +466,7 @@ if (revForm) {
         return;
       }
 
-      // Replace loading text with the live AI response from Cloudflare
+      // Replace loading text with the live AI response from Gemini
       loadingCard.innerHTML = 
         "<small style='color:var(--muted); display:block; margin-bottom:4px;'>Topic Searched</small><b>" + topic + "</b>" +
         "<div style='margin-top:16px;'><small style='color:var(--accent); font-weight:700; display:block; margin-bottom:4px;'>AI Revision Summary</small>" +
