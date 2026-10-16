@@ -10,7 +10,6 @@ export default async (req, context) => {
       return new Response(JSON.stringify({ error: "Prompt is required" }), { status: 400 });
     }
 
-    // Access your Google Gemini API key from Netlify settings
     const apiKey = process.env.GEMINI_API_KEY;
 
     if (!apiKey) {
@@ -19,21 +18,12 @@ export default async (req, context) => {
 
     const systemInstructionText = `You are an expert IGCSE tutor specializing in Cambridge and Edexcel syllabi. Focus on concise explanations, mark-scheme terms, key definitions, and step-by-step clarity. Subject context: ${subject || 'General IGCSE'}.`;
 
-    // Send request to Google Gemini API (Gemini 1.5 Flash)
     const apiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        system_instruction: {
-          parts: [{ text: systemInstructionText }]
-        },
-        contents: [
-          {
-            parts: [{ text: prompt }]
-          }
-        ]
+        system_instruction: { parts: [{ text: systemInstructionText }] },
+        contents: [{ parts: [{ text: prompt }] }]
       })
     });
 
@@ -55,7 +45,6 @@ export default async (req, context) => {
   }
 };
 
-// Route this function to /api/chat so your frontend works seamlessly
 export const config = {
   path: "/api/chat"
 };
