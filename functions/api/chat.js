@@ -1,34 +1,61 @@
-export async function onRequestPost(context) {
+export default async (req, context) => {
+  if (req.method !== "POST") {
+    return new Response(JSON.stringify({ error: "Method not allowed" }), { status: 405 });
+  }
+
   try {
-    const { request, env } = context;
-    const { prompt, subject } = await request.json();
+    const { prompt, subject } = await req.json();
 
     if (!prompt) {
-      return new Response(JSON.stringify({ error: 'Prompt is required' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' }
-      });
+      return new Response(JSON.stringify({ error: "Prompt is required" }), { status: 400 });
     }
 
-    const systemInstruction = `You are an expert IGCSE tutor specializing in Cambridge and Edexcel syllabi. Focus on concise explanations, mark-scheme terms, key definitions, and step-by-step clarity. Subject context: ${subject || 'General IGCSE'}.`;
+    // Access your Google Gemini API key from Netlify settings
+    const apiKey = process.env.GEMINI_API_KEY;
 
-    // Run Cloudflare's hosted AI model via the environment binding
-    const answer = await env.AI.run('@cf/meta/llama-3.1-8b-instruct', {
-      messages: [
-        { role: 'system', content: systemInstruction },
-        { role: 'user', content: prompt }
-      ]
+    if (!apiKey) {
+      return new Response(JSON.stringify({ error: "GEMINI_API_KEY is missing in Netlify settings" }), { status: 500 });
+    }
+
+    const systemInstructionText = `You are an expert IGCSE tutor specializing in Cambridge and Edexcel syllabi. Focus on concise explanations, mark-scheme terms, key definitions, and step-by-step clarity. Subject context: ${subject || 'General IGCSE'}.`;
+
+    // Send request to Google Gemini API (Gemini 1.5 Flash)
+    const apiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        system_instruction: {
+          parts: [{ text: systemInstructionText }]
+        },
+        contents: [
+          {
+            parts: [{ text: prompt }]
+          }
+        ]
+      })
     });
 
-    return new Response(JSON.stringify({ reply: answer.response }), {
+    const data = await apiResponse.json();
+
+    if (!apiResponse.ok) {
+      throw new Error(data.error?.message || "Failed to generate response from Gemini");
+    }
+
+    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "No response generated.";
+
+    return new Response(JSON.stringify({ reply }), {
       status: 200,
-      headers: { 'Content-Type': 'application/json' }
+      headers: { "Content-Type": "application/json" }
     });
 
   } catch (err) {
-    return new Response(JSON.stringify({ error: err.message || 'Internal server error' }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' }
-    });
+    return new Response(JSON.stringify({ error: err.message || "Internal server error" }), { status: 500 });
   }
-}
+};
+
+// Route this function to /api/chat so your frontend works seamlessly
+export const config = {
+  path: "/api/chat"
+};
