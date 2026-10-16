@@ -18,8 +18,8 @@ export default async (req, context) => {
 
     const systemInstructionText = `You are an expert IGCSE tutor specializing in Cambridge and Edexcel syllabi. Focus on concise explanations, mark-scheme terms, key definitions, and step-by-step clarity. Subject context: ${subject || 'General IGCSE'}.`;
 
-    // Updated to use the gemini-3.5-flash-lite endpoint
-    const apiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key=${apiKey}`, {
+    // Updated to use the gemini-3.8-flash endpoint
+    const apiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${apiKey}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
