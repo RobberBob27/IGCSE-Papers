@@ -78,19 +78,22 @@ If information is uncertain, say so.
 
     const data = await apiResponse.json();
 
-    if (!apiResponse.ok) {
-      console.error("Anthropic API error:", apiResponse.status);
+if (!apiResponse.ok) {
+  const details = data.error?.message || "Unknown API error";
 
-      return new Response(
-        JSON.stringify({
-          error: "The AI tutor could not generate a response."
-        }),
-        {
-          status: apiResponse.status === 429 ? 429 : 502,
-          headers
-        }
-      );
+  console.error("Anthropic API error:", apiResponse.status, details);
+
+  return new Response(
+    JSON.stringify({
+      error: details,
+      status: apiResponse.status
+    }),
+    {
+      status: apiResponse.status,
+      headers
     }
+  );
+}
 
     const reply = (data.content || [])
       .filter(item => item.type === "text")
