@@ -93,19 +93,20 @@ the fewest words necessary.
 
     const data = await apiResponse.json();
 
-    if (!apiResponse.ok || data.error) {
-      console.error("Cloudflare AI request failed:", {
-        status: apiResponse.status,
-        error: data.error || data.errors
-      });
+   if (!apiResponse.ok || data.error || data.success === false) {
+  console.error("Cloudflare AI request failed:", {
+    status: apiResponse.status,
+    response: JSON.stringify(data)
+  });
 
-      return new Response(
-        JSON.stringify({
-          error: "The AI tutor request failed. Check your Cloudflare credentials, model access and billing."
-        }),
-        { status: 502, headers }
-      );
-    }
+  return new Response(
+    JSON.stringify({
+      error: "Cloudflare AI request failed. Check Netlify function logs.",
+      status: apiResponse.status
+    }),
+    { status: 502, headers }
+  );
+}
 
     const reply = Array.isArray(data.content)
       ? data.content
