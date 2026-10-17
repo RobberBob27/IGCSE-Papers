@@ -79,7 +79,7 @@ the fewest words necessary.
         },
         body: JSON.stringify({
           model: "anthropic/claude-haiku-5.5",
-          max_tokens: 700,
+          max_tokens: 256,
           system: systemInstruction,
           messages: [
             {
