@@ -38,19 +38,39 @@ export default async (req, context) => {
     }
 
     const systemInstruction = `
-You are an expert IGCSE tutor specializing in Cambridge
-and Pearson Edexcel syllabuses.
+You are an expert IGCSE tutor.
 
-Subject: ${String(subject || "General IGCSE").slice(0, 100)}
+RESPONSE STYLE:
+- Be concise, direct and easy to understand.
+- Aim for 2-5 sentences for ordinary questions.
+- Answer the exact question first.
+- Avoid unnecessary introductions and repetition.
+- Use headings and bullet points only when useful.
+- Do not omit essential information to be shorter.
+- Give detailed, step-by-step explanations when requested.
+- Never invent facts, mark-scheme points or syllabus rules.
+- If uncertain, say so.
 
-Give concise explanations, accurate key definitions,
-exam-style terminology and clear step-by-step working.
-For exam questions, identify relevant marking points.
-Do not claim generated answers are official mark schemes.
+EXAM RULES:
+- Use precise, creditworthy IGCSE terminology.
+- Match the answer to the command word and mark allocation.
+- For calculations, show essential working and the final answer.
+- For Maths, explain the necessary method.
+- For sciences, explain the key scientific principle.
+- For languages, provide accurate grammar and translations.
+- For English, support interpretations with relevant evidence.
+
+Aim to maximise understanding and exam marks using
+the fewest words necessary.
 `;
 
+    const studentQuestion = [
+      subject ? `Subject: ${subject}` : "",
+      prompt.trim()
+    ].filter(Boolean).join("\n\n");
+
     const apiResponse = await fetch(
-      `https://api.cloudflare.com/client/v4/accounts/${accountId}/ai/run/@cf/meta/llama-3.1-8b-instruct`,
+      `https://api.cloudflare.com/client/v4/accounts/${accountId}/ai/v1/messages`,
       {
         method: "POST",
         headers: {
@@ -58,33 +78,47 @@ Do not claim generated answers are official mark schemes.
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          prompt: `${systemInstruction}\n\nStudent question:\n${prompt.trim()}`,
-          max_tokens: 800
+          model: "anthropic/claude-haiku-5.5",
+          max_tokens: 700,
+          system: systemInstruction,
+          messages: [
+            {
+              role: "user",
+              content: studentQuestion
+            }
+          ]
         })
       }
     );
 
     const data = await apiResponse.json();
 
-    if (!apiResponse.ok || !data.success) {
+    if (!apiResponse.ok || data.error) {
       console.error("Cloudflare AI request failed:", {
         status: apiResponse.status,
-        errors: data.errors
+        error: data.error || data.errors
       });
 
       return new Response(
         JSON.stringify({
-          error: "Cloudflare AI request failed. Check your credentials, model and usage limits."
+          error: "The AI tutor request failed. Check your Cloudflare credentials, model access and billing."
         }),
         { status: 502, headers }
       );
     }
 
-    const reply =
-      data.result?.response || "No response generated.";
+    const reply = Array.isArray(data.content)
+      ? data.content
+          .filter(block => block.type === "text")
+          .map(block => block.text)
+          .join("\n")
+          .trim()
+      : "";
 
     return new Response(
-      JSON.stringify({ reply }),
+      JSON.stringify({
+        reply: reply || "No response generated."
+      }),
       { status: 200, headers }
     );
 
