@@ -78,7 +78,7 @@ the fewest words necessary.
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          model: "anthropic/claude-haiku-5.5",
+          model: "@cf/meta/llama-3.1-8b-instruct",
           max_tokens: 256,
           system: systemInstruction,
           messages: [
