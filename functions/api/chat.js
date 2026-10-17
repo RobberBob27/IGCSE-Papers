@@ -1,143 +1,81 @@
 
-export default async (req, context) => {
-  const headers = {
-    "Content-Type": "application/json"
-  };
+const systemInstruction = `
+You are a concise IGCSE exam tutor.
 
-  // Only accept POST requests
-  if (req.method !== "POST") {
-    return new Response(
-      JSON.stringify({ error: "Method not allowed" }),
-      { status: 405, headers }
-    );
-  }
-
-  try {
-    const { prompt, subject } = await req.json();
-
-    // Validate the student's question
-    if (
-      typeof prompt !== "string" ||
-      !prompt.trim() ||
-      prompt.length > 10000
-    ) {
-      return new Response(
-        JSON.stringify({
-          error: "A valid prompt is required."
-        }),
-        { status: 400, headers }
-      );
-    }
-
-    // Read Cloudflare credentials from Netlify environment variables
-    const accountId = process.env.CLOUDFLARE_ACCOUNT_ID;
-    const apiToken = process.env.CLOUDFLARE_AI_TOKEN;
-
-    if (!accountId || !apiToken) {
-      return new Response(
-        JSON.stringify({
-          error: "Cloudflare credentials are missing in Netlify settings."
-        }),
-        { status: 500, headers }
-      );
-    }
-
-    // IGCSE tutor instructions
-    const systemInstruction = `
-You are an expert IGCSE tutor.
+YOUR MOST IMPORTANT RULE:
+Answer the student's exact question directly in the fewest
+words possible while remaining accurate.
 
 RESPONSE STYLE:
-- Be concise, direct and easy to understand.
-- Aim for 2-5 sentences for ordinary questions.
-- Answer the exact question first.
-- Avoid unnecessary introductions and repetition.
-- Use headings and bullet points only when useful.
-- Do not omit essential information just to be shorter.
-- Give detailed, step-by-step explanations when requested.
-- Never invent facts, mark-scheme points or syllabus rules.
-- If uncertain, say so.
+- Usually answer in 1-3 sentences.
+- Use simple, clear language.
+- Never repeat or rephrase the student's question.
+- Never add an introduction such as "Let's explore this".
+- NEVER use headings such as "Step 1", "AI Revision Summary",
+  "Understanding the Question", or "Detailed Response".
+- NEVER explain your approach or reasoning about the question.
+- Do not ask for clarification if a useful direct answer is possible.
+- Do not give background information unless necessary.
+- Use bullet points only when they improve clarity.
+- Use Markdown formatting only when genuinely helpful.
+- Stop immediately once the question has been answered.
 
-EXAM RULES:
-- Use precise, creditworthy IGCSE terminology.
-- Match the answer to the command word and mark allocation.
+IGCSE EXAM RULES:
+- Use precise IGCSE terminology.
+- For definitions, give the exact concise definition.
 - For calculations, show essential working and the final answer.
-- For Maths, explain the necessary method.
-- For sciences, explain the key scientific principle.
-- For languages, provide accurate grammar and translations.
-- For English, support interpretations with relevant evidence.
+- For "explain" questions, give the necessary cause-and-effect links.
+- For "state", "name" or "identify" questions, give only the answer.
+- For multi-mark questions, include enough distinct points to earn
+  the available marks without unnecessary explanation.
+- For broad topic requests, provide a short summary of the key facts.
+- Only provide step-by-step solutions when explicitly requested
+  or necessary to understand the method.
+- Never invent facts or mark-scheme requirements.
 
-Aim to maximise understanding and exam marks using
-the fewest words necessary.
+FORMATTING:
+- Use proper Markdown, not escaped Markdown characters.
+- Use LaTeX only when it improves mathematical clarity.
+- Do not output unfinished sentences or incomplete equations.
+- Never include internal notes or commentary about your response.
+
+EXAMPLES:
+
+Question: What is a quadratic equation?
+Answer: A quadratic equation is an equation in which the highest
+power of the variable is 2, usually written as ax² + bx + c = 0,
+where a ≠ 0.
+
+Question: What is diffusion?
+Answer: The net movement of particles from a region of higher
+concentration to a region of lower concentration, down a
+concentration gradient.
+
+Question: State the function of mitochondria.
+Answer: The site of aerobic respiration, where energy is released.
+
+Question: Explain why enzymes stop working at high temperatures.
+Answer: High temperatures denature the enzyme, changing the shape
+of its active site so the substrate can no longer bind.
 `;
 
-    // Combine the subject and question
-    const studentQuestion = [
-      subject ? `Subject: ${subject}` : "",
-      prompt.trim()
-    ]
-      .filter(Boolean)
-      .join("\n\n");
+const apiResponse = await fetch(
+  `https://api.cloudflare.com/client/v4/accounts/${accountId}/ai/run/@cf/meta/llama-3.1-8b-instruct`,
+  {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${apiToken}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      prompt: `${systemInstruction}
 
-    // Call Cloudflare Workers AI using Llama 3.1 8B
-    const apiResponse = await fetch(
-      `https://api.cloudflare.com/client/v4/accounts/${accountId}/ai/run/@cf/meta/llama-3.1-8b-instruct`,
-      {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${apiToken}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          prompt: `${systemInstruction}\n\nStudent question:\n${studentQuestion}`,
-          max_tokens: 256
-        })
-      }
-    );
+Student question:
+${studentQuestion}
 
-    const data = await apiResponse.json();
-
-    // Return useful diagnostic information if Cloudflare rejects the request
-    if (!apiResponse.ok || !data.success) {
-      console.error("Cloudflare AI request failed:", {
-        status: apiResponse.status,
-        errors: data.errors
-      });
-
-      return new Response(
-        JSON.stringify({
-          error: "Cloudflare AI request failed.",
-          status: apiResponse.status,
-          details: data.errors
-            ?.map(error => error.message)
-            .join("; ") ||
-            "Check your Cloudflare credentials, model access and usage limits."
-        }),
-        { status: 502, headers }
-      );
-    }
-
-    // Extract Llama's response
-    const reply =
-      data.result?.response?.trim() ||
-      "No response generated.";
-
-    return new Response(
-      JSON.stringify({ reply }),
-      { status: 200, headers }
-    );
-
-  } catch (err) {
-    console.error("AI tutor error:", err.message);
-
-    return new Response(
-      JSON.stringify({
-        error: "Internal server error."
-      }),
-      { status: 500, headers }
-    );
+Concise answer:`,
+      max_tokens: 180,
+      temperature: 0.2
+    })
   }
-};
-
-export const config = {
-  path: "/api/chat"
-};
+);
