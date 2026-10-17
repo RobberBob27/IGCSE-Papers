@@ -4,6 +4,7 @@ export default async (req, context) => {
     "Content-Type": "application/json"
   };
 
+  // Only accept POST requests
   if (req.method !== "POST") {
     return new Response(
       JSON.stringify({ error: "Method not allowed" }),
@@ -14,17 +15,21 @@ export default async (req, context) => {
   try {
     const { prompt, subject } = await req.json();
 
+    // Validate the student's question
     if (
       typeof prompt !== "string" ||
       !prompt.trim() ||
       prompt.length > 10000
     ) {
       return new Response(
-        JSON.stringify({ error: "A valid prompt is required." }),
+        JSON.stringify({
+          error: "A valid prompt is required."
+        }),
         { status: 400, headers }
       );
     }
 
+    // Read Cloudflare credentials from Netlify environment variables
     const accountId = process.env.CLOUDFLARE_ACCOUNT_ID;
     const apiToken = process.env.CLOUDFLARE_AI_TOKEN;
 
@@ -37,6 +42,7 @@ export default async (req, context) => {
       );
     }
 
+    // IGCSE tutor instructions
     const systemInstruction = `
 You are an expert IGCSE tutor.
 
@@ -46,7 +52,7 @@ RESPONSE STYLE:
 - Answer the exact question first.
 - Avoid unnecessary introductions and repetition.
 - Use headings and bullet points only when useful.
-- Do not omit essential information to be shorter.
+- Do not omit essential information just to be shorter.
 - Give detailed, step-by-step explanations when requested.
 - Never invent facts, mark-scheme points or syllabus rules.
 - If uncertain, say so.
@@ -64,13 +70,17 @@ Aim to maximise understanding and exam marks using
 the fewest words necessary.
 `;
 
+    // Combine the subject and question
     const studentQuestion = [
       subject ? `Subject: ${subject}` : "",
       prompt.trim()
-    ].filter(Boolean).join("\n\n");
+    ]
+      .filter(Boolean)
+      .join("\n\n");
 
+    // Call Cloudflare Workers AI using Llama 3.1 8B
     const apiResponse = await fetch(
-      `https://api.cloudflare.com/client/v4/accounts/${accountId}/ai/v1/messages`,
+      `https://api.cloudflare.com/client/v4/accounts/${accountId}/ai/run/@cf/meta/llama-3.1-8b-instruct`,
       {
         method: "POST",
         headers: {
@@ -78,48 +88,41 @@ the fewest words necessary.
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          model: "@cf/meta/llama-3.1-8b-instruct",
-          max_tokens: 256,
-          system: systemInstruction,
-          messages: [
-            {
-              role: "user",
-              content: studentQuestion
-            }
-          ]
+          prompt: `${systemInstruction}\n\nStudent question:\n${studentQuestion}`,
+          max_tokens: 256
         })
       }
     );
 
     const data = await apiResponse.json();
 
-   if (!apiResponse.ok || data.error || data.success === false) {
-  console.error("Cloudflare AI request failed:", {
-    status: apiResponse.status,
-    response: JSON.stringify(data)
-  });
+    // Return useful diagnostic information if Cloudflare rejects the request
+    if (!apiResponse.ok || !data.success) {
+      console.error("Cloudflare AI request failed:", {
+        status: apiResponse.status,
+        errors: data.errors
+      });
 
-  return new Response(
-    JSON.stringify({
-      error: "Cloudflare AI request failed. Check Netlify function logs.",
-      status: apiResponse.status
-    }),
-    { status: 502, headers }
-  );
-}
+      return new Response(
+        JSON.stringify({
+          error: "Cloudflare AI request failed.",
+          status: apiResponse.status,
+          details: data.errors
+            ?.map(error => error.message)
+            .join("; ") ||
+            "Check your Cloudflare credentials, model access and usage limits."
+        }),
+        { status: 502, headers }
+      );
+    }
 
-    const reply = Array.isArray(data.content)
-      ? data.content
-          .filter(block => block.type === "text")
-          .map(block => block.text)
-          .join("\n")
-          .trim()
-      : "";
+    // Extract Llama's response
+    const reply =
+      data.result?.response?.trim() ||
+      "No response generated.";
 
     return new Response(
-      JSON.stringify({
-        reply: reply || "No response generated."
-      }),
+      JSON.stringify({ reply }),
       { status: 200, headers }
     );
 
@@ -127,7 +130,9 @@ the fewest words necessary.
     console.error("AI tutor error:", err.message);
 
     return new Response(
-      JSON.stringify({ error: "Internal server error." }),
+      JSON.stringify({
+        error: "Internal server error."
+      }),
       { status: 500, headers }
     );
   }
