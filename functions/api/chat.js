@@ -20,19 +20,18 @@ export default async (req, context) => {
       prompt.length > 10000
     ) {
       return new Response(
-        JSON.stringify({
-          error: "A valid prompt is required (maximum 10,000 characters)."
-        }),
+        JSON.stringify({ error: "A valid prompt is required." }),
         { status: 400, headers }
       );
     }
 
-    const apiKey = process.env.ANTHROPIC_API_KEY;
+    const accountId = process.env.CLOUDFLARE_ACCOUNT_ID;
+    const apiToken = process.env.CLOUDFLARE_AI_TOKEN;
 
-    if (!apiKey) {
+    if (!accountId || !apiToken) {
       return new Response(
         JSON.stringify({
-          error: "ANTHROPIC_API_KEY is missing in Netlify settings."
+          error: "Cloudflare credentials are missing in Netlify settings."
         }),
         { status: 500, headers }
       );
@@ -42,73 +41,55 @@ export default async (req, context) => {
 You are an expert IGCSE tutor specializing in Cambridge
 and Pearson Edexcel syllabuses.
 
-Subject context: ${String(subject || "General IGCSE").slice(0, 100)}.
+Subject: ${String(subject || "General IGCSE").slice(0, 100)}
 
-Provide clear, concise explanations using appropriate
-IGCSE terminology, key definitions, and step-by-step
-working where useful.
-
+Give concise explanations, accurate key definitions,
+exam-style terminology and clear step-by-step working.
 For exam questions, identify relevant marking points.
 Do not claim generated answers are official mark schemes.
-If information is uncertain, say so.
 `;
 
     const apiResponse = await fetch(
-      "https://api.anthropic.com/v1/messages",
+      `https://api.cloudflare.com/client/v4/accounts/${accountId}/ai/run/@cf/meta/llama-3.1-8b-instruct`,
       {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
-          "x-api-key": apiKey,
-          "anthropic-version": "2023-06-01"
+          "Authorization": `Bearer ${apiToken}`,
+          "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          model: "claude-sonnet-5-5",
-          max_tokens: 1200,
-          system: systemInstruction,
-          messages: [
-            {
-              role: "user",
-              content: prompt.trim()
-            }
-          ]
+          prompt: `${systemInstruction}\n\nStudent question:\n${prompt.trim()}`,
+          max_tokens: 800
         })
       }
     );
 
     const data = await apiResponse.json();
 
-if (!apiResponse.ok) {
-  const details = data.error?.message || "Unknown API error";
+    if (!apiResponse.ok || !data.success) {
+      console.error("Cloudflare AI request failed:", {
+        status: apiResponse.status,
+        errors: data.errors
+      });
 
-  console.error("Anthropic API error:", apiResponse.status, details);
-
-  return new Response(
-    JSON.stringify({
-      error: details,
-      status: apiResponse.status
-    }),
-    {
-      status: apiResponse.status,
-      headers
+      return new Response(
+        JSON.stringify({
+          error: "Cloudflare AI request failed. Check your credentials, model and usage limits."
+        }),
+        { status: 502, headers }
+      );
     }
-  );
-}
 
-    const reply = (data.content || [])
-      .filter(item => item.type === "text")
-      .map(item => item.text)
-      .join("\n");
+    const reply =
+      data.result?.response || "No response generated.";
 
     return new Response(
-      JSON.stringify({
-        reply: reply || "No response generated."
-      }),
+      JSON.stringify({ reply }),
       { status: 200, headers }
     );
 
   } catch (err) {
-    console.error("Tutor function failed:", err.message);
+    console.error("AI tutor error:", err.message);
 
     return new Response(
       JSON.stringify({ error: "Internal server error." }),
