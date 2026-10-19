@@ -129,7 +129,7 @@ active site, preventing the substrate from binding.
               content: studentQuestion
             }
           ],
-          max_tokens: 300,
+          max_tokens: 700,
           temperature: 0.2
         })
       }
